@@ -18,35 +18,31 @@ import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 import org.apache.hadoop.util.ToolRunner;
 import org.jsoup.Jsoup;
-import org.jsoup.helper.Validate;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-class IntArrayWritable extends ArrayWritable {
+class LongArrayWritable extends ArrayWritable {
 
-    public IntArrayWritable(IntWritable[] values) {
-        super(IntWritable.class, values);
+    LongArrayWritable(LongWritable[] values) {
+        super(LongWritable.class, values);
     }
 
     @Override
-    public IntWritable[] get() {
-        return (IntWritable[]) super.get();
+    public LongWritable[] get() {
+        return (LongWritable[]) super.get();
     }
 
     @Override
     public String toString() {
-        IntWritable[] values = get();
+        LongWritable[] values = get();
         StringBuilder out = new StringBuilder();
-        for (IntWritable i : values){
+        for (LongWritable i : values){
             out.append(i.toString());
             out.append(" ");
         }
@@ -56,7 +52,7 @@ class IntArrayWritable extends ArrayWritable {
 
 public class GraphMaker extends Configured implements Tool {
 
-    private static HashMap<String, Integer> index = new HashMap<>();
+    private static HashMap<String, Long> index = new HashMap<>();
 
     static public void main(String[] args) throws Exception {
         int ret = ToolRunner.run(new GraphMaker(), args);
@@ -80,7 +76,7 @@ public class GraphMaker extends Configured implements Tool {
         job.setMapperClass(ParseMapper.class);
         job.setNumReduceTasks(0);
         job.setOutputKeyClass(IntWritable.class);
-        job.setOutputValueClass(IntArrayWritable.class);
+        job.setOutputValueClass(LongArrayWritable.class);
 
         Path pt=new Path(index_file);
         FileSystem fs = FileSystem.get(conf);
@@ -88,16 +84,16 @@ public class GraphMaker extends Configured implements Tool {
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             String[] split = line.split("\t");
-            index.put(split[1], Integer.parseInt(split[0]));
+            index.put(split[1], Long.parseLong(split[0]));
         }
 
         return job;
     }
 
-    public static class ParseMapper extends Mapper<IntWritable, Text, IntWritable, IntArrayWritable>
+    public static class ParseMapper extends Mapper<LongWritable, Text, LongWritable, LongArrayWritable>
     {
         @Override
-        protected void map(IntWritable key, Text value, Context context) throws IOException, InterruptedException {
+        protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             Inflater decompresser = new Inflater();
             Base64.Decoder decoder = Base64.getMimeDecoder();
             byte[] compressed = decoder.decode(value.toString());
@@ -114,18 +110,18 @@ public class GraphMaker extends Configured implements Tool {
             String html = new String(result, 0, resultLength, "UTF-8");
             Document doc = Jsoup.parse(html);
             Elements links = doc.select("a[href]");
-            HashSet<IntWritable> links_id = new HashSet<>();
+            HashSet<LongWritable> links_id = new HashSet<>();
 
             for (Element link : links) {
                 String link_text = "";
                 if (link.attr("abs:href").equals(""))
                     link_text = "http://lenta.ru";
                 link_text += link.attr("href");
-                IntWritable id = new IntWritable(index.get(link_text));
+                LongWritable id = new LongWritable(index.get(link_text));
                 links_id.add(id);
             }
 
-            context.write(key, new IntArrayWritable((IntWritable[]) links_id.toArray()));
+            context.write(key, new LongArrayWritable((LongWritable[]) links_id.toArray()));
         }
     }
 }
