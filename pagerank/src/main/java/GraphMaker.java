@@ -95,6 +95,10 @@ public class GraphMaker extends Configured implements Tool {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             Inflater decompresser = new Inflater();
+            System.out.println("KEY:");
+            System.out.println(key);
+            System.out.println("Value:");
+            System.out.println(value.toString());
             Base64.Decoder decoder = Base64.getMimeDecoder();
             byte[] compressed = decoder.decode(value.toString());
             decompresser.setInput(compressed, 0, compressed.length);
