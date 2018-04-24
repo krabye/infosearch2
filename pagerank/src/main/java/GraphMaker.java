@@ -77,6 +77,7 @@ public class GraphMaker extends Configured implements Tool {
         job.setOutputValueClass(LongArrayWritable.class);
 
         conf.set("index_file", index_file_name);
+        System.out.println("Index name :" + index_file_name);
 
         return job;
     }
