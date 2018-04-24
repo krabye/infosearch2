@@ -115,6 +115,9 @@ public class GraphMaker extends Configured implements Tool {
             Elements links = doc.select("a[href]");
             HashSet<LongWritable> links_id = new HashSet<>();
 
+            System.out.println("Len of map:");
+            System.out.println(index.size());
+
             for (Element link : links) {
                 String link_text = "";
                 if (link.attr("abs:href").equals(""))
