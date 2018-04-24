@@ -127,8 +127,10 @@ public class GraphMaker extends Configured implements Tool {
                 if (link.attr("abs:href").equals(""))
                     link_text = "http://lenta.ru";
                 link_text += link.attr("href");
-                LongWritable id = new LongWritable(index.get(link_text));
-                links_id.add(id);
+                if (index.containsKey(link_text)) {
+                    LongWritable id = new LongWritable(index.get(link_text));
+                    links_id.add(id);
+                }
             }
 
             context.write(idx, new LongArrayWritable((LongWritable[]) links_id.toArray()));
