@@ -64,6 +64,9 @@ public class GraphMaker extends Configured implements Tool {
     }
 
     private Job GetJobConf(Configuration conf, String index_file_name, String input, String out_dir) throws IOException {
+        conf.set("index_file", index_file_name);
+        System.out.println("Index name :" + conf.get("index_file"));
+
         Job job = Job.getInstance(conf);
         job.setJarByClass(GraphMaker.class);
         job.setJobName(GraphMaker.class.getCanonicalName());
@@ -75,10 +78,6 @@ public class GraphMaker extends Configured implements Tool {
         job.setNumReduceTasks(0);
         job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(LongArrayWritable.class);
-
-        conf.set("index_file", index_file_name);
-        System.out.println("Index name :" + conf.get("index_file"));
-
 
         return job;
     }
