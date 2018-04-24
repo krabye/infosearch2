@@ -124,7 +124,7 @@ public class GraphMaker extends Configured implements Tool {
                 links_id.add(id);
             }
 
-            context.write(key, new LongArrayWritable((LongWritable[]) links_id.toArray()));
+            context.write(idx, new LongArrayWritable((LongWritable[]) links_id.toArray()));
         }
     }
 }
