@@ -16,10 +16,24 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+
 dependencies {
     compile 'org.apache.hadoop:hadoop-common:2.6.0-cdh5.14.0'
     compile 'org.apache.hadoop:hadoop-mapreduce-client-core:2.6.0-cdh5.14.0'
     compile 'org.apache.hbase:hbase-client:1.2.0-cdh5.14.0'
     compile 'org.apache.hbase:hbase-server:1.2.0-cdh5.14.0'
+    extraLibs group: 'net.java.dev.jna', name: 'jna-platform', version: '4.2.2'
+    testCompile group: 'junit', name: 'junit', version: '+'
+    configurations.compile.extendsFrom(configurations.extraLibs)
     compile 'org.jsoup:jsoup:1.11.3'
+}
+
+jar {
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
