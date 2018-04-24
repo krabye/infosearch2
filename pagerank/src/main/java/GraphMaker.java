@@ -133,7 +133,14 @@ public class GraphMaker extends Configured implements Tool {
                 }
             }
 
-            context.write(idx, new LongArrayWritable((LongWritable[]) links_id.toArray()));
+            LongWritable[] links_arr = new LongWritable[links_id.size()];
+            int i = 0;
+            for (LongWritable id: links_id){
+                links_arr[i] = id;
+                i++;
+            }
+
+            context.write(idx, new LongArrayWritable(links_arr));
         }
     }
 }
