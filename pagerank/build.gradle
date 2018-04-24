@@ -6,12 +6,12 @@ targetCompatibility = 1.8
 
 repositories {
     maven {
-        name = 'cloudera'
-        url = 'https://repository.cloudera.com/artifactory/cloudera-repos'
-    }
-    maven {
         name = 'jsoup'
         url = 'https://mvnrepository.com/artifact/org.jsoup/jsoup'
+    }
+    maven {
+        name = 'cloudera'
+        url = 'https://repository.cloudera.com/artifactory/cloudera-repos'
     }
     mavenCentral()
 }
