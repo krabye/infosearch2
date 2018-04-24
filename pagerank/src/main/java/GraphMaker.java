@@ -26,6 +26,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import sun.security.krb5.Config;
 
 class LongArrayWritable extends ArrayWritable {
 
@@ -52,8 +53,6 @@ class LongArrayWritable extends ArrayWritable {
 
 public class GraphMaker extends Configured implements Tool {
 
-    private static String index_file;
-
     static public void main(String[] args) throws Exception {
         int ret = ToolRunner.run(new GraphMaker(), args);
         System.exit(ret);
@@ -78,7 +77,7 @@ public class GraphMaker extends Configured implements Tool {
         job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(LongArrayWritable.class);
 
-        index_file = index_file_name;
+        conf.set("index_file", index_file_name);
 
         return job;
     }
@@ -88,8 +87,9 @@ public class GraphMaker extends Configured implements Tool {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
             HashMap<String, Long> index = new HashMap<>();
-            Path pt=new Path(index_file);
-            FileSystem fs = FileSystem.get(context.getConfiguration());
+            Configuration conf = context.getConfiguration();
+            Path pt=new Path(conf.get("index_file"));
+            FileSystem fs = FileSystem.get(conf);
             BufferedReader bufferedReader =new BufferedReader(new InputStreamReader(fs.open(pt)));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
