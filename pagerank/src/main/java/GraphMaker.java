@@ -52,7 +52,7 @@ class LongArrayWritable extends ArrayWritable {
 
 public class GraphMaker extends Configured implements Tool {
 
-    private static HashMap<String, Long> index = new HashMap<>();
+    private static String index_file;
 
     static public void main(String[] args) throws Exception {
         int ret = ToolRunner.run(new GraphMaker(), args);
@@ -65,7 +65,7 @@ public class GraphMaker extends Configured implements Tool {
         return job.waitForCompletion(true) ? 0 : 1;
     }
 
-    private Job GetJobConf(Configuration conf, String index_file, String input, String out_dir) throws IOException {
+    private Job GetJobConf(Configuration conf, String index_file_name, String input, String out_dir) throws IOException {
         Job job = Job.getInstance(conf);
         job.setJarByClass(GraphMaker.class);
         job.setJobName(GraphMaker.class.getCanonicalName());
@@ -78,14 +78,7 @@ public class GraphMaker extends Configured implements Tool {
         job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(LongArrayWritable.class);
 
-        Path pt=new Path(index_file);
-        FileSystem fs = FileSystem.get(conf);
-        BufferedReader bufferedReader =new BufferedReader(new InputStreamReader(fs.open(pt)));
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            String[] split = line.split("\t");
-            index.put(split[1], Long.parseLong(split[0]));
-        }
+        index_file = index_file_name;
 
         return job;
     }
@@ -94,6 +87,16 @@ public class GraphMaker extends Configured implements Tool {
     {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+            HashMap<String, Long> index = new HashMap<>();
+            Path pt=new Path(index_file);
+            FileSystem fs = FileSystem.get(context.getConfiguration());
+            BufferedReader bufferedReader =new BufferedReader(new InputStreamReader(fs.open(pt)));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] split = line.split("\t");
+                index.put(split[1], Long.parseLong(split[0]));
+            }
+
             String[] split = value.toString().split("\t");
             LongWritable idx = new LongWritable(Long.parseLong(split[0]));
             String base64 = split[1];
