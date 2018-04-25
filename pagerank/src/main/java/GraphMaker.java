@@ -65,7 +65,6 @@ public class GraphMaker extends Configured implements Tool {
 
     private Job GetJobConf(Configuration conf, String index_file_name, String input, String out_dir) throws IOException {
         conf.set("index_file", index_file_name);
-        System.out.println("Index name :" + conf.get("index_file"));
 
         Job job = Job.getInstance(conf);
         job.setJarByClass(GraphMaker.class);
@@ -84,18 +83,21 @@ public class GraphMaker extends Configured implements Tool {
 
     public static class ParseMapper extends Mapper<LongWritable, Text, LongWritable, LongArrayWritable>
     {
+        HashMap<String, Long> index = new HashMap<>();
+
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-            HashMap<String, Long> index = new HashMap<>();
-            Configuration conf = context.getConfiguration();
-            System.out.println(conf.get("index_file"));
-            Path pt=new Path(conf.get("index_file"));
-            FileSystem fs = FileSystem.get(conf);
-            BufferedReader bufferedReader =new BufferedReader(new InputStreamReader(fs.open(pt)));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] split = line.split("\t");
-                index.put(split[1], Long.parseLong(split[0]));
+            if (index.size() == 0) {
+                Configuration conf = context.getConfiguration();
+                System.out.println(conf.get("index_file"));
+                Path pt = new Path(conf.get("index_file"));
+                FileSystem fs = FileSystem.get(conf);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fs.open(pt)));
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    String[] split = line.split("\t");
+                    index.put(split[1], Long.parseLong(split[0]));
+                }
             }
 
             String[] split = value.toString().split("\t");
@@ -118,9 +120,6 @@ public class GraphMaker extends Configured implements Tool {
             Document doc = Jsoup.parse(html);
             Elements links = doc.select("a[href]");
             HashSet<LongWritable> links_id = new HashSet<>();
-
-            System.out.println("Len of map:");
-            System.out.println(index.size());
 
             for (Element link : links) {
                 String link_text = "";
