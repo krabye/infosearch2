@@ -73,9 +73,9 @@ public class PageRank extends Configured implements Tool {
     {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-            System.out.println(value.toString());
+//            System.out.println(value.toString());
             String[] split = value.toString().split("\t");
-            System.out.println(split.length);
+//            System.out.println(split.length);
             IntWritable node_id;
             Double rank;
             String[] node_list;
@@ -85,13 +85,14 @@ public class PageRank extends Configured implements Tool {
                 node_id = new IntWritable(Integer.parseInt(split[0]));
                 rank = 1.0 / N;
                 node_list = split[1].split(" ");
+                context.write(node_id, new Text("S"+split[1]));
             } else {
                 node_id = new IntWritable(Integer.parseInt(split[0]));
                 rank = Double.parseDouble(split[1]);
                 node_list = split[2].split(" ");
+                context.write(node_id, new Text("S"+split[2]));
             }
 
-            context.write(node_id, new Text("S"+split[2]));
             context.write(node_id, new Text("O"+rank));
 
             if (node_list.length == 0){
