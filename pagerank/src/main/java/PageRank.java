@@ -73,6 +73,7 @@ public class PageRank extends Configured implements Tool {
     {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+            System.out.println(value.toString());
             String[] split = value.toString().split("\t");
             IntWritable node_id;
             Double rank;
