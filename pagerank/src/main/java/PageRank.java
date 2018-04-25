@@ -33,9 +33,12 @@ public class PageRank extends Configured implements Tool {
         Configuration conf = getConf();
         conf.set("N", N.toString());
         conf.set("alpha", "0.15");
+        conf.set("Iter", "0");
         Job job = GetJobConf(conf, input, output);
         if (!job.waitForCompletion(true))
             return 1;
+
+        conf.set("Iter", "1");
         while (job.getCounters().findCounter("COMMON_COUNTERS", "LowChanges").getValue() != N ) {
             System.out.println("Iter: "+i+", LowChanges/N: "+
                     job.getCounters().findCounter("COMMON_COUNTERS", "LowChanges").getValue()+
@@ -73,24 +76,34 @@ public class PageRank extends Configured implements Tool {
     {
         @Override
         protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-            System.out.println(value.toString());
+//            System.out.println(value.toString());
             String[] split = value.toString().split("\t");
-            System.out.println(split.length);
+//            System.out.println(split.length);
             IntWritable node_id;
             Double rank;
             String[] node_list;
             Integer N = Integer.parseInt(context.getConfiguration().get("N"));
 
-            if (split.length == 2) {
-                node_id = new IntWritable(Integer.parseInt(split[0]));
+            node_id = new IntWritable(Integer.parseInt(split[0]));
+
+            if (context.getConfiguration().get("Iter").equals("0")) {
                 rank = 1.0 / N;
-                node_list = split[1].split(" ");
-                context.write(node_id, new Text("S"+split[1]));
+                if (split.length == 1) {
+                    node_list = new String[0];
+                    context.write(node_id, new Text("S"));
+                } else {
+                    node_list = split[1].split(" ");
+                    context.write(node_id, new Text("S"+split[1]));
+                }
             } else {
-                node_id = new IntWritable(Integer.parseInt(split[0]));
                 rank = Double.parseDouble(split[1]);
-                node_list = split[2].split(" ");
-                context.write(node_id, new Text("S"+split[2]));
+                if (split.length == 2) {
+                    node_list = new String[0];
+                    context.write(node_id, new Text("S"));
+                } else {
+                    node_list = split[2].split(" ");
+                    context.write(node_id, new Text("S"+split[2]));
+                }
             }
 
             context.write(node_id, new Text("O"+rank));
